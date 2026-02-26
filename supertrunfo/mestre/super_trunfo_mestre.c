@@ -88,6 +88,18 @@ float obterValorAtributo(const Carta *c, int atributo) {
     }
 }
 
+/*
+ * Retorna o valor convertido para a soma final.
+ * Regra normal: usa o proprio valor.
+ * Regra invertida (densidade): multiplica por -1 para que
+ * "maior soma vence" continue valido mesmo com "menor vence".
+ */
+float obterValorParaSoma(const Carta *c, int atributo) {
+    float valorBase = obterValorAtributo(c, atributo);
+    float fator = regraInvertida(atributo) ? -1.0f : 1.0f;
+    return valorBase * fator;
+}
+
 void imprimirCartasResumo(Carta a, Carta b) {
     printf("\n=== Cartas Cadastradas ===\n");
 
@@ -214,6 +226,7 @@ void compararDoisAtributos(Carta a, Carta b, int atr1, int atr2) {
     float valorA1, valorB1;
     float valorA2, valorB2;
     float somaA, somaB;
+    float somaComparacaoA, somaComparacaoB;
 
     printf("\n=== COMPARACAO FINAL ===\n");
     printf("Comparacao: %s vs %s\n", a.nomePais, b.nomePais);
@@ -222,16 +235,24 @@ void compararDoisAtributos(Carta a, Carta b, int atr1, int atr2) {
     compararAtributoIndividual(&a, &b, atr1, &valorA1, &valorB1);
     compararAtributoIndividual(&a, &b, atr2, &valorA2, &valorB2);
 
+    /* Soma bruta apenas para exibicao ao usuario. */
     somaA = valorA1 + valorA2;
     somaB = valorB1 + valorB2;
+
+    /*
+     * Soma usada na decisao final:
+     * atributos com regra invertida entram com sinal negativo.
+     */
+    somaComparacaoA = obterValorParaSoma(&a, atr1) + obterValorParaSoma(&a, atr2);
+    somaComparacaoB = obterValorParaSoma(&b, atr1) + obterValorParaSoma(&b, atr2);
 
     printf("\nSoma %s: %.2f\n", a.nomePais, somaA);
     printf("Soma %s: %.2f\n", b.nomePais, somaB);
 
     /* Simplificacao didatica permitida: comparacao direta de float. */
-    if (somaA > somaB) {
+    if (somaComparacaoA > somaComparacaoB) {
         printf("Resultado final: %s venceu!\n", a.nomePais);
-    } else if (somaB > somaA) {
+    } else if (somaComparacaoB > somaComparacaoA) {
         printf("Resultado final: %s venceu!\n", b.nomePais);
     } else {
         printf("Resultado final: Empate!\n");
